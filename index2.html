@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Kendo UI Snippet</title>
+
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="http://kendo.cdn.telerik.com/2016.1.406/js/kendo.all.min.js"></script>
+    <script src="src/rectangle.js"></script>
+</head>
+<body>
+
+<div id="surface" style="width:200px;height: 350px;"></div>
+<script>
+  var draw = kendo.drawing;
+  var geom = kendo.geometry;
+  var Rect = kendo.geometry.Rect;
+  var Path = draw.Path;
+
+  var areThereCollision = function(rect1,rect2){
+    if (rect1.abscissa < rect2.abscissa + rect2.percent &&
+       rect1.abscissa + rect1.percent > rect2.abscissa &&
+       rect1.coordinate < rect2.coordinate + rect2.amount &&
+       rect1.amount + rect1.coordinate > rect2.coordinate) {
+         console.log("hay colision");
+    }else{
+      console.log("good :)");
+    }
+  }
+
+  var getRect = function(rectangles){
+    var arrayRect = [];
+    rectangles.forEach(function(item){
+      arrayRect.push(new Rect([item.abscissa, item.coordinate], [item.percent, item.amount]));
+    });
+    return arrayRect;
+  }
+
+  var rectJson = {
+    canvaWith:200,
+    canvaHeight:300,
+    rectangles:[
+      {
+        abscissa:5,
+        coordinate:5,
+        percent:50,
+        amount: 50,
+        layers:[1,2,3]
+      },
+      {
+        abscissa:60,
+        coordinate:60,
+        percent:60,
+        amount: 40,
+        layers:[1,2,3]
+      }
+    ]
+  };
+
+  var areaCanvas = new Rect([0, 0], [rectJson.canvaWith, rectJson.canvaHeight]);
+  var layout = new draw.Layout(areaCanvas,{
+    alignContent:"start",
+    alignItems: "start",
+    justifyContent: "start"
+  });
+
+  var pathRects = getRect(rectJson.rectangles);
+  areThereCollision(rectJson.rectangles[0],rectJson.rectangles[1]);
+  var surface = draw.Surface.create($("#surface"));
+
+  pathRects.forEach(function(item){
+    var rect = Path.fromRect(item);
+    rect.fill("orange");
+    surface.draw(rect);
+  });
+
+</script>
+</body>
+</html>
