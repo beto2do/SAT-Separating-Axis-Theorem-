@@ -6,75 +6,37 @@
 
     <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
     <script src="http://kendo.cdn.telerik.com/2016.1.406/js/kendo.all.min.js"></script>
+    <script src="src/vector.2d.js"></script>
+    <script src="src/rectangle.2d.js"></script>
+    <script src="src/mudmap.js"></script>
 </head>
 <body>
 
 <div id="surface" style="width:200px;height: 350px;"></div>
 <script>
-  var draw = kendo.drawing;
-  var geom = kendo.geometry;
-  var Rect = kendo.geometry.Rect;
-  var Path = draw.Path;
-
-  var getRect = function(rectangles){
-    var arrayRect = [];
-    rectangles.forEach(function(item){
-      arrayRect.push(new Rect([0, 0], [item.percent, item.amount]));
-    });
-    return arrayRect;
-  }
-
   var rectJson = {
     canvaWith:200,
     canvaHeight:300,
     rectangles:[
       {
-        percent:150,
-        amount: 270,
+        abscissa:40,
+        coordinate:30,
+        width:50,
+        height: 50,
         layers:[1,2,3]
       },
       {
-        percent:30,
-        amount: 220,
-        layers:[1,2,3]
-      },
-      {
-        percent:20,
-        amount: 220,
-        layers:[1,2,3]
-      },
-      {
-        percent:30,
-        amount: 50,
-        layers:[1,2,3]
-      },
-      {
-        percent:20,
-        amount: 50,
+        abscissa:91,
+        coordinate:10,
+        width:60,
+        height: 40,
         layers:[1,2,3]
       }
     ]
   };
-
-  var areaCanvas = new Rect([0, 0], [rectJson.canvaWith, rectJson.canvaHeight]);
-  var layout = new draw.Layout(areaCanvas,{
-    alignContent:"start",
-    alignItems: "start",
-    justifyContent: "end"
+  $( document ).ready(function() {
+    makeMudMap(rectJson);
   });
-
-  var pathRects = getRect(rectJson.rectangles);
-
-  pathRects.forEach(function(item){
-    var rect = Path.fromRect(item);
-    rect.fill("orange");
-    layout.append(rect);
-  });
-
-  layout.reflow();
-
-  var surface = draw.Surface.create($("#surface"));
-  surface.draw(layout);
 </script>
 </body>
 </html>

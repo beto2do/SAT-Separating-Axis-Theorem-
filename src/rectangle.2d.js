@@ -5,100 +5,70 @@ function makeRectangle(abscissa,coordinate, width, height){
   size = new geom.Size(width, height),
   rect = new geom.Rect(origin, size);
 
-
-  outside.getCenterPoint = function(){
-    var centerAbscissa = origin.getX() + (size.getWidth() / 2);
-    var centerCoordinate = origin.getY() + (size.getHeight() / 2);
-    return new geom.Point(centerAbscissa, centerCoordinate);
-  }
-
-   var getVectorA = function(){
+   var getCenterToRightUpVector = function() {
     return new geom.Point(size.getWidth() / 2,-size.getHeight() / 2);
   }
 
-  var getVectorB = function(){
+  var getCenterToLeftUpVector = function() {
     return new geom.Point(-size.getWidth() / 2,-size.getHeight() / 2);
   }
 
-  var getVectorC = function(){
+  var getCenterToLeftBottomVector = function() {
     return new geom.Point(-size.getWidth() / 2,size.getHeight() / 2);
   }
 
-  var getVectorD = function(){
+  var getCenterToRightBottomVector = function() {
     return new geom.Point(size.getWidth() / 2,size.getHeight() / 2);
   }
 
-  var getFirstPointSquare = function(){
+  var getLeftUpPoint = function() {
     return origin;
   }
 
-  var getSecondPointSquare = function(){
+  var getRightUpPoint = function() {
     return new geom.Point(origin.getX() + size.getWidth(),origin.getY());
   }
 
-  var getThirdPointSquare = function(){
+  var getLeftBottomPoint = function() {
     return new geom.Point(origin.getX() + size.getWidth(),origin.getY() + size.getHeight());
   }
 
-  var getFourthPointSquare = function(){
+  var getRightBottomPoint = function() {
     return new geom.Point(origin.getX(),origin.getY() + size.getHeight());
   }
 
-  outside.getKendoRect = function(){
+  var isThereAGap = function(axis, vectorP, vectorA, vectorB) {
+
+    var magnitudeProjAOnAxis = Vector2D.getScalarProjectionOfAOnP(vectorA, axis);
+    var magnitudeProjBOnAxis = Vector2D.getScalarProjectionOfAOnP(vectorB, axis);
+    var magnitudeProjPOnAxis = Vector2D.getScalarProjectionOfAOnP(vectorP, axis);
+
+    var gap = magnitudeProjPOnAxis - magnitudeProjAOnAxis - magnitudeProjBOnAxis;
+    var greatThanCero = (gap > 0);
+
+    return !greatThanCero;
+  }
+
+  outside.getKendoRect = function() {
     return rect;
   }
 
-  var generateVector = function(initialPoint, finalPoint) {
-    var abscissa = finalPoint.getX() - initialPoint.getX();
-    var coordinate = finalPoint.getY() - initialPoint.getY();
-    return new geom.Point(abscissa, coordinate);
-  }
-
-  outside.getVectors = function() {
-    var vectorA = getVectorA();
-    var vectorB = getVectorB();
-    var vectorC = getVectorC();
-    var vectorD = getVectorD();
-    return [vectorA,vectorB,vectorC,vectorD];
-  }
-
-  outside.getAxies = function() {
-    var vectorX = generateVector(getFirstPointSquare(),getSecondPointSquare());
-    var vectorY = generateVector(getSecondPointSquare(),getThirdPointSquare());
-    var vectorW = generateVector(getThirdPointSquare(),getFourthPointSquare());
-    var vectorZ = generateVector(getFourthPointSquare(),getFirstPointSquare());
-    return [vectorX,vectorY,vectorW,vectorZ];
-  }
-
-  var areThereCollision = function(axis, vectorP, vectorA, vectorB) {
-
-    var magnitudeProjection1 = Vector2D.getScalarProjectionOfAOnP(vectorA, axis);
-    var magnitudeProjection2 = Vector2D.getScalarProjectionOfAOnP(vectorB, axis);
-    var magnitudeProjection3 = Vector2D.getScalarProjectionOfAOnP(vectorP, axis);
-    var response = true;
-
-    var gap = magnitudeProjection3 - magnitudeProjection1 - magnitudeProjection2;
-    if(gap > 0){
-      response = false;
-    }
-    return response;
-  }
-
-  outside.hasOverlap = function(rectB) {
+  outside.hasOverlap = function(rectangle) {
     var centerPointA = this.getCenterPoint();
-    var centerPointB = rectB.getCenterPoint();
+    var centerPointB = rectangle.getCenterPoint();
 
-    var vectorP = Vector2D.generateVectorBetweenTwoPoints(centerPointA,centerPointB);
+    var vectorBetweenCenters = Vector2D.generateVectorBetweenTwoPoints(centerPointA,centerPointB);
 
-    var vectorsA = this.getVectors();
-    var vectorsB = rectB.getVectors();
-    var axisA = this.getAxies();
+    var vectorGroupA = this.getInteriorVectors();
+    var vectorGroupB = rectangle.getInteriorVectors();
+    var axesGroupA = this.getAxes();
     var hasOverlap = true;
+
     noOverlap:
-    for(numAxes = 0; numAxes < axisA.length; numAxes++){
-      for(numVectA = 0; numVectA < vectorsA.length; numVectA++){
-        for(numVectB = 0; numVectB < vectorsB.length; numVectB++){
-          if(!areThereCollision(axisA[numAxes],vectorP,vectorsA[numVectA],vectorsB[numVectB])){
+    for(numAxes = 0; numAxes < axesGroupA.length; numAxes++){
+      for(numVectA = 0; numVectA < vectorGroupA.length; numVectA++){
+        for(numVectB = 0; numVectB < vectorGroupB.length; numVectB++){
+          if(!isThereAGap(axesGroupA[numAxes],vectorBetweenCenters,vectorGroupA[numVectA],vectorGroupB[numVectB])){
             hasOverlap = false;
             break noOverlap;
           }
@@ -107,6 +77,28 @@ function makeRectangle(abscissa,coordinate, width, height){
     }
 
     return hasOverlap;
+  }
+
+  outside.getCenterPoint = function() {
+    var centerAbscissa = origin.getX() + (size.getWidth() / 2);
+    var centerCoordinate = origin.getY() + (size.getHeight() / 2);
+    return new geom.Point(centerAbscissa, centerCoordinate);
+  }
+
+  outside.getInteriorVectors = function() {
+    var vectorA = getCenterToRightUpVector();
+    var vectorB = getCenterToLeftUpVector();
+    var vectorC = getCenterToLeftBottomVector();
+    var vectorD = getCenterToRightBottomVector();
+    return [vectorA,vectorB,vectorC,vectorD];
+  }
+
+  outside.getAxes = function() {
+    var vectorUp = Vector2D.generateVectorBetweenTwoPoints(getLeftUpPoint(),getRightUpPoint());
+    var vectorRight = Vector2D.generateVectorBetweenTwoPoints(getRightUpPoint(),getLeftBottomPoint());
+    var vectorBottom = Vector2D.generateVectorBetweenTwoPoints(getLeftBottomPoint(),getRightBottomPoint());
+    var vectorLeft = Vector2D.generateVectorBetweenTwoPoints(getRightBottomPoint(),getLeftUpPoint());
+    return [vectorUp,vectorRight,vectorBottom,vectorLeft];
   }
 
   return outside;
