@@ -1,7 +1,6 @@
 function makeMudMap(config){
   var outside = {},
       draw = kendo.drawing,
-      Path = draw.Path,
       surface = draw.Surface.create($("#surface"));
 
   var createRectangles2D = function(rectangles){
@@ -11,15 +10,6 @@ function makeMudMap(config){
       arrayRect.push(rectangle);
     });
     return arrayRect;
-  }
-
-  var getRandomColor = function() {
-    var letters = '0123456789ABCDEF'.split('');
-    var color = '#';
-    for (var i = 0; i < 6; i++ ) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
   }
 
   var pathRects = createRectangles2D(config.rectangles);
@@ -33,10 +23,9 @@ function makeMudMap(config){
     console.info("There isn't overlap :)");
   }
 
-  pathRects.forEach(function(rectangle){
-    var rect = Path.fromRect(rectangle.getKendoRect());
-    rect.fill(getRandomColor());
-    surface.draw(rect);
+  pathRects.forEach(function(rectangle) {
+    var kendoRect = rectangle.getKendoRect();
+    surface.draw(kendoRect);
   });
 
   return outside;

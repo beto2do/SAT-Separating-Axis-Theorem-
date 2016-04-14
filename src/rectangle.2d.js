@@ -1,9 +1,21 @@
 function makeRectangle(abscissa,coordinate, width, height){
   var outside = {},
   geom = kendo.geometry,
+  draw = kendo.drawing,
+  Path = draw.Path,
   origin = new geom.Point(abscissa, coordinate),
   size = new geom.Size(width, height),
-  rect = new geom.Rect(origin, size);
+  rect = new geom.Rect(origin, size),
+  pathRect = Path.fromRect(rect);
+
+  var getRandomColor = function() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  }
 
    var getCenterToRightUpVector = function() {
     return new geom.Point(size.getWidth() / 2,-size.getHeight() / 2);
@@ -50,7 +62,19 @@ function makeRectangle(abscissa,coordinate, width, height){
   }
 
   outside.getKendoRect = function() {
-    return rect;
+    return pathRect;
+  }
+
+  outside.moveLeft = function(scalar) {
+    var abscissa = origin.getX() - scalar;
+    pathRect.transform(geom.transform().translate(-scalar, 0));
+    origin.setX(abscissa);
+  }
+
+  outside.moveRight = function(scalar) {
+    var abscissa = origin.getX() + scalar;
+    pathRect.transform(geom.transform().translate(scalar, 0));
+    origin.setX(abscissa);
   }
 
   outside.hasOverlap = function(rectangle) {
@@ -101,5 +125,6 @@ function makeRectangle(abscissa,coordinate, width, height){
     return [vectorUp,vectorRight,vectorBottom,vectorLeft];
   }
 
+  pathRect.fill(getRandomColor());
   return outside;
 }
